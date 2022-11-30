@@ -4,7 +4,7 @@ const { Pool } = require('pg');
 require('dotenv').config();
 
 // Observar passagem por variáveis de ambiente
-const PORT = process.env.PORT || 3333;
+const PORT = process.env.PORT;
 const pool = new Pool({
     connectionString: process.env.POSTGRES_URL
 })
