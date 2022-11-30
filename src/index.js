@@ -1,18 +1,18 @@
 const express = require('express');
+const cors = require('cors');
 const { Pool } = require('pg');
+require('dotenv').config();
 
 // Observar passagem por variáveis de ambiente
-const PORT = 3333;
+const PORT = process.env.PORT || 3333;
 const pool = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'todo_teste',
-    password: 'root',
-    port: '5432'
+    connectionString: process.env.POSTGRES_URL
 })
 
 const app = express();
+
 app.use(express.json());
+app.use(cors());
 
 // Get para usuários
 app.get('/usuarios', async (req, res) => {
@@ -63,7 +63,7 @@ app.get('/agenda/:id_usuario', async (req, res) => {
 app.post('/agenda/:id_usuario', async (req, res) => {
     const { descricao_agenda, concluido } = req.body;
     const { id_usuario } = req.params;
-    //Validar id
+    //Validar id antes de filtrar por usuário
     try {
         const validaUsuario = await pool.query(`SELECT * FROM usuarios WHERE id_usuario = ($1)`, [id_usuario])
         if (validaUsuario.rows.length === 0) { return res.status(400).send({ menssagem: "Operação inválida" }); }
@@ -81,7 +81,7 @@ app.post('/agenda/:id_usuario', async (req, res) => {
 
 })
 
-// Alterando agenda de um usuário 
+// Alterando agenda de um usuário passando id da agenda
 app.patch('/agenda/:id_usuario/:id_agenda', async (req, res) => {
     const { id_usuario, id_agenda } = req.params;
     const data = req.body;
@@ -103,7 +103,7 @@ app.patch('/agenda/:id_usuario/:id_agenda', async (req, res) => {
 })
 
 
-// Deletando agenda de um usuário 
+// Deletando agenda de um usuário e validando 
 
 app.delete('/agenda/:id_usuario/:id_agenda', async (req, res) => {
     const { id_usuario, id_agenda } = req.params;
